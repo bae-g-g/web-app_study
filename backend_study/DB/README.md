@@ -15,6 +15,20 @@
 3. 학습 내용
     - 데이터베이스 개요 
     - 데이터베이스 시스템
+    - CRUD
+    - 관계정의
+    - JOIN
+4. 과정
+    - MySQL 설치
+    - 사용자 & DB 생성
+    - 테이블 생성 
+    - 더미 데이터 추가
+    - 데이터 검색
+    - 데이터 변경
+
+
+
+
 <br>
 
 # 1. 프로젝트 의의
@@ -157,91 +171,72 @@ CREATE TABLE temperature_logs (
 
 <br><details><summary> 데이터베이스 개요 </summary>
 
-
-
-**DB**
-* 데이터베이스(database)
-* 데이터들의 묶음,개념을을 뜻하는 다언
-
+### 데이터베이스 (DB, DataBase)
+- **정의**: 여러 사용자가 공유하고 사용할 목적으로, 체계적으로 통합하여 관리하는 데이터의 집합입니다.
+- **목적**: 단순히 데이터를 모아두는 것을 넘어, 필요할 때 원하는 정보를 효율적으로 검색, 추가, 수정, 삭제하기 위해 구조화된 형태로 데이터를 저장합니다.
 
 <br>
 
-**DBMS**
-* 데이터베이스 관리 시스템(database management systeam)
-* 데이터&데이터 관리 도구를 모아 둔 시스템
-* DBMS를 간단하게 DB라고 부른다.
-* 대표적으로 MySQL,Oracle,Mongo DB 등이 존재
+### 데이터베이스 관리 시스템 (DBMS, DataBase Management System)
+- **정의**: 사용자와 데이터베이스 사이에서, 데이터베이스를 생성하고 관리하며 효율적으로 사용할 수 있도록 돕는 소프트웨어입니다.
+- **역할**: DBMS는 데이터베이스에 대한 모든 접근을 제어하며, 사용자가 직접 파일 시스템에 접근하지 않고도 데이터를 안전하고 편리하게 다룰 수 있도록 다양한 기능을 제공하는 인터페이스 역할을 수행합니다.
+- **대표적인 DBMS**: Oracle, **MySQL**, MS SQL Server, PostgreSQL (이상 관계형), MongoDB, Redis (이상 비관계형) 등이 있습니다.
 
 <br>
 
-**DBMS 사용의 장점**
- 
-* 고속으로 데이터 read/write등의 알고리즘이 구현되어 제공
-* 동시성,충돌 관리해주어 사용자가 동시에 데이터에 접근할 때 발생하는 충돌 문제를 해결
-* 시스템 장애 발생 시 데이터를 장애 발생 이전의 상태로 복구하는 기능을 제공합니다.
-* 데이터의 독립성 유지하기 때문에 논리적인 db의 데이터에만 의존한다.
+### DBMS의 장점
+DBMS를 사용하면 다음과 같은 장점을 얻을 수 있습니다.
+
+*   **데이터 독립성 확보**: 물리적/논리적 데이터 독립성을 통해, 데이터의 저장 구조가 변경되거나 논리적 구조가 변경되어도 관련 응용 프로그램을 수정할 필요가 없습니다.
+*   **데이터 중복 최소화 및 일관성 유지**: 데이터를 통합 관리하여 불필요한 중복을 줄이고, 데이터가 여러 곳에서 다른 값을 갖는 비일관성 문제를 해결합니다.
+*   **데이터 무결성 보장**: 제약조건(Constraints)을 통해 유효하고 정확한 데이터만 데이터베이스에 저장되도록 보장합니다.
+*   **데이터 공유 및 동시 접근 제어**: 여러 사용자가 동시에 데이터에 접근하고 공유할 수 있으며, 동시성 제어(Concurrency Control)를 통해 데이터의 일관성을 해치지 않도록 관리합니다.
+*   **데이터 보안 강화**: 사용자별로 접근 권한을 차등 부여하여 허가되지 않은 사용자의 데이터 접근을 막고 데이터를 안전하게 보호합니다.
+*   **백업 및 복구**: 시스템에 장애가 발생했을 때, 데이터를 장애 발생 이전의 상태로 복구할 수 있는 안정적인 기능을 제공합니다.
 
 <br>
 
-**DBMS의 종류**
+### DBMS의 종류
 
-> ### 관계형 DB 
-> - 구조 및 제약조건(스키마)를 만들어 데이터를 보관한다.
-> - PK,FK를 통해 테이블간의 참조 관계를 형성한다.
-> - RDBMS라고 불리며 Orcle,MySQL이 대표적.
+> ### 관계형 DBMS (RDBMS)
+> - **정의**: 모든 데이터를 2차원의 테이블(Table) 형태로 표현하고, 테이블 간의 관계를 이용해 데이터를 관리하는 시스템입니다.
+> - **특징**: 정해진 스키마(Schema)에 따라 데이터를 저장해야 하므로 데이터의 구조가 명확하고, **ACID**(원자성, 일관성, 고립성, 지속성) 트랜잭션(Transaction)을 통해 데이터의 신뢰성을 보장합니다.
+> - **대표 DBMS**: MySQL, Oracle, PostgreSQL 등
 
-> ### 비관계형 DB 
-> - RDBMS의 구조로 데이터를 저장하지 않는 DBMS를 의미
-> - 주로 json형태로 데이터를 저장하며,자유로운 형태로 데이터를 저장가능
-> - mongo DB,Redis가 대표적
-
-
-
-
+> ### 비관계형 DBMS (NoSQL)
+> - **정의**: RDBMS의 테이블 구조보다 더 유연한 데이터 모델을 사용하는 DBMS를 총칭합니다.
+> - **특징**: 스키마가 없거나(Schemaless) 동적으로 변경될 수 있어 자유로운 데이터 저장이 가능하며, 분산 환경에서의 뛰어난 확장성(Scalability)과 성능을 목표로 합니다. 데이터 모델에 따라 Document, Key-Value, Column-Family, Graph 등 다양한 유형이 있습니다.
+> - **대표 DBMS**: MongoDB, Redis, Cassandra 등
 
 <br></details><br>
 
 <br><details><summary> 데이터베이스 시스템 </summary>
 
-**논리적 계층**
-1. 인스턴스 (instance)
-    - 현재 메모리에서 실행되고 있는 MySQL 서버 프로세스.데이터베이스를 관리하고 운영하는 데 필요한 모든 기능(메모리, 프로세스, 스레드 등)의 집합체
+> **데이터베이스 시스템(DBS, DataBase System)** 이란, 일반적으로 데이터베이스(DB)와 이를 관리하는 DBMS, 그리고 관련된 응용 프로그램 및 사용자를 모두 포함하는 전체 시스템을 의미합니다.
 
-2. 스키마(schema)
-    
-    - 스키마는 관련된 데이터베이스 객체들(테이블, 뷰 등)의 집합. 즉, 서로 연관 있는 데이터들을 담아두는 하나의 큰 서랍장이나 컨테이너와 같습니다. MySQL에서는 SCHEMA와 DATABASE가 동일한 의미로 사용.
+이 프로젝트에서 사용하는 MySQL은 이러한 데이터베이스 시스템의 핵심인 DBMS에 해당하며, 그 내부 아키텍처는 크게 **MySQL 엔진**과 **스토리지 엔진** 두 개의 계층으로 나뉩니다.
 
-    - 하나의 인스턴스 안에는 여러 개의 스키마(데이터베이스)를 생성하여 목적에 따라 데이터를 분리하고 관리할 수 있습니다. (예: user_db, product_db)
+### MySQL 서버 아키텍처
 
-3. 테이블 (table)
-    - 테이블은 실제 데이터가 저장되는 기본 단위이며, 스키마 내부에 생성됩니다. 엑셀 시트처럼 행(Row)과 열(Column)로 구성된 2차원 구조를 가집니다.
+#### 1. MySQL 엔진 (MySQL Engine)
+클라이언트의 요청을 받아 SQL을 분석하고 최적화하는, MySQL의 '두뇌' 역할을 담당합니다.
 
-**물리적 계층**
-
-1. MySQL 엔진 (MySQL Engine Layer)
-    - 이 계층은 쿼리를 해석하고 실행하는 MySQL의 두뇌 역할을 합니다. 클라이언트로부터 받은 SQL 문장을 분석하고 최적화하여 가장 효율적인 실행 계획을 세우는 핵심적인 부분입니다.
-
-    - 연결 핸들러 (Connection Handler): 클라이언트의 접속과 통신을 관리하고, 사용자 인증 및 권한을 확인합니다.
-
-    - SQL 파서 (SQL Parser): 사용자가 보낸 SQL 문장의 문법을 검사하고, 문장을 MySQL이 이해할 수 있는 작은 단위로 분해합니다.
-
-    - 옵티마이저 (Optimizer): 분해된 쿼리를 어떻게 실행하는 것이 가장 빠르고 효율적일지 실행 계획을 수립합니다. 예를 들어, 어떤 순서로 테이블을 읽고 어떤 인덱스를 사용할지 결정합니다.
-
-    - 쿼리 캐시 (Query Cache): 이전에 실행했던 쿼리와 그 결과를 메모리에 저장해두었다가, 동일한 쿼리가 다시 들어오면 데이터를 직접 읽지 않고 캐시에서 바로 결과를 반환하여 성능을 높입니다. (MySQL 8.0부터는 제거되었습니다.)
-
-2. 스토리지 엔진 (Storage Engine Layer)
-    - MySQL 엔진이 세운 실행 계획에 따라, 실제로 데이터를 디스크에 저장하거나 디스크에서 읽어오는 작업을 전담하는 계층입니다. MySQL은 '플러그인 방식'을 지원하여, 하나의 데이터베이스에서도 테이블마다 다른 종류의 스토리지 엔진을 사용할 수 있습니다.
-
-    - InnoDB: 현재 가장 널리 사용되는 기본 스토리지 엔진입니다. 트랜잭션(Transaction)을 지원하여 데이터의 일관성과 무결성을 보장하는 데 강력하며, 높은 동시성 처리에 유리합니다.
+-   **커넥션 핸들러 (Connection Handler)**: 클라이언트의 접속, 인증, 그리고 각 클라이언트와 서버 간의 통신을 관리합니다.
+-   **SQL 파서 (SQL Parser)**: SQL 문장의 문법을 검사하고, MySQL이 이해할 수 있는 단위(Parse Tree)로 분해합니다.
+-   **옵티마이저 (Optimizer)**: 파싱된 쿼리를 어떻게 실행하는 것이 가장 효율적일지 실행 계획을 수립합니다. 이 과정에서 인덱스 사용 여부, 테이블 조인 순서 등을 결정하며, 쿼리 성능에 가장 큰 영향을 미칩니다.
 
 
-3. 스토리지 (Storage/File System Layer)
-    - 스토리지 엔진이 처리한 데이터를 실제 물리적인 파일(데이터 파일, 로그 파일 등)로 디스크에 저장하는 운영체제 수준의 계층입니다. 이 계층은 운영체제의 파일 시스템 위에서 동작하며 데이터의 영구적인 보관을 책임집니다.
+#### 2. 스토리지 엔진 (Storage Engine)
+MySQL 엔진이 수립한 실행 계획에 따라, 실제 데이터를 디스크에 저장하거나 읽어오는 물리적인 작업을 담당하는 부분입니다. MySQL은 '플러그인(Pluggable)' 방식을 지원하여, 테이블마다 다른 종류의 스토리지 엔진을 지정할 수 있습니다. 대부분 InnoDB를 사용합니다.
 
+-   **InnoDB**: 현재 MySQL의 기본 스토리지 엔진입니다. **트랜잭션(Transaction)**과 **외래 키(Foreign Key)**를 지원하여 데이터의 일관성과 무결성을 강력하게 보장하며, 높은 동시성 처리 성능을 제공합니다. 이 프로젝트의 모든 테이블은 InnoDB 엔진을 사용합니다.
+
+
+#### 3. 파일 시스템 (File System)
+스토리지 엔진이 처리한 데이터를 실제 물리적인 파일(데이터 파일, 로그 파일 등)으로 디스크에 저장하는 운영체제(OS) 수준의 계층입니다.
 
 <br></details><br>
 
-<br>
 
 <br><details><summary> CRUD </summary>
 
@@ -306,25 +301,87 @@ WHERE sensor_id ="1번센서";
 <br></details><br>
 
 
-<br>
-
-<br><details><summary> JOIN </summary>
-
-
-
-<br></details><br>
-
-
-<br>
 
 <br><details><summary> 관계정의 </summary>
 
+> 데이터베이스에서의 '관계'는 테이블들을 서로 연결하여 데이터의 일관성과 무결성을 보장하는 핵심적인 개념입니다. 이 프로젝트에서는 sensors 테이블과 temperature_logs 테이블 간의 관계를 정의하여, 논리적으로 연결된 데이터를 효율적으로 관리합니다.
 
+<br>
+
+### 관계의 핵심: PK와 FK
+
+*   **Primary Key (PK, 기본 키)**: 테이블의 각 행(row)을 고유하게 식별하는 값입니다. `sensors` 테이블의 `sensor_id`가 여기에 해당합니다.
+*   **Foreign Key (FK, 외래 키)**: 한 테이블의 필드(column)가 다른 테이블의 PK를 참조하는 것을 의미합니다. `temperature_logs`의 `sensor_id`는 `sensors` 테이블의 `sensor_id`를 참조하는 FK입니다.
+
+<br>
+
+### 이 프로젝트의 관계: 1:N (일대다)
+
+> `sensors`와 `temperature_logs`는 **1:N (일대다)** 관계를 가집니다.
+> **"하나의 센서(`sensors`)는 여러 개의 온도 기록(`temperature_logs`)을 가질 수 있다."**
+
+이 관계는 `temperature_logs` 테이블에 다음과 같이 `FOREIGN KEY` 제약조건을 설정함으로써 구현됩니다.
+
+~~~sql
+-- temperature_logs 테이블 생성 구문 중...
+FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id) ON DELETE CASCADE
+~~~
+
+<br>
+
+### `ON DELETE CASCADE`: 관계의 자동 관리
+
+`ON DELETE CASCADE` 옵션은 관계의 무결성을 유지하기 위한 중요한 설정입니다.
+
+*   **동작 방식**: 부모 테이블(`sensors`)에서 특정 센서의 데이터가 삭제될 경우, 해당 센서를 참조하고 있는 자식 테이블(`temperature_logs`)의 모든 관련 데이터(온도 로그)도 **자동으로 함께 삭제**됩니다.
+*   **장점**: 더 이상 존재하지 않는 센서의 '고아 데이터(Orphan Data)'가 남는 것을 방지하여, 데이터의 정합성을 시스템이 자동으로 보장해줍니다. 예를 들어 `SENSOR-01`이 철거되어 `sensors` 테이블에서 삭제되면, `SENSOR-01`에 대한 모든 온도 로그 기록도 깔끔하게 사라집니다.
 
 <br></details><br>
 
 
+<br><details><summary> JOIN </summary>
+
+> `JOIN`은 두 개 이상의 테이블에 나뉘어 저장된 데이터를, **공통된 컬럼(FK-PK 관계)을 기준으로 합쳐서** 하나의 결과 집합으로 조회하는 가장 중요한 SQL 기능 중 하나입니다.
+
 <br>
+
+### 왜 JOIN이 필요한가?
+
+이 프로젝트의 핵심 목표인 **"센서별 맞춤형 이상 온도 감지"** 를 구현하려면 `JOIN`이 필수적입니다.
+
+-   측정된 온도 값은 `temperature_logs` 테이블에 있습니다.
+-   하지만, 그 온도가 위험한지 판단하는 기준인 '임계 온도' 값은 `sensors` 테이블에 있습니다.
+
+따라서, 두 테이블을 연결해야만 "측정된 온도가 해당 센서의 임계 온도를 넘었는지"를 비교할 수 있습니다.
+
+<br>
+
+### `INNER JOIN`을 활용한 이상 온도 감지
+
+`INNER JOIN`은 두 테이블에 공통적으로 존재하는 데이터만을 결합합니다. `sensor_id`를 기준으로 두 테이블을 합친 뒤, `WHERE` 절을 사용해 이상 데이터를 선별하는 쿼리는 다음과 같습니다.
+
+~~~sql
+-- 각 센서의 '임계 온도'를 초과한 모든 로그를 조회
+SELECT
+    logs.log_id,
+    logs.sensor_id,
+    logs.temperature_celsius,
+    s.critical_temp_celsius, -- 어떤 임계값을 넘었는지 확인하기 위해 SELECT에 추가
+    logs.created_at,
+    s.location
+FROM
+    temperature_logs AS logs -- 별칭(Alias)을 사용해 쿼리를 간결하게 만듦
+INNER JOIN
+    sensors AS s ON logs.sensor_id = s.sensor_id
+WHERE
+    logs.temperature_celsius >= s.critical_temp_celsius -- 핵심: 자신의 임계값과 비교
+ORDER BY
+    logs.created_at DESC;
+~~~
+
+이 쿼리는 단순한 `SELECT`를 넘어, 관계형 데이터베이스의 장점을 극대화하여 "데이터에 기반한 지능형 분석"을 수행하는 실무적인 예시입니다.
+
+<br></details><br>
 
 <br><details><summary> 데이터 관리 </summary>
 
@@ -343,5 +400,49 @@ mysql -u [사용자명] -p [적용할_데이터베이스명] < [백업파일명.
 DB에 해당하는 파일 데이터를 적용합니다.
 
 
+
+<br></details><br>
+
+<br>
+
+# 4. 과정
+
+
+
+<br><details><summary> MySQL 설치 </summary>
+
+    ![setupimg](./img/setup.png);
+
+<br></details><br>
+
+
+
+<br><details><summary> 사용자 & DB 생성 </summary>
+    
+    ![createuserimg](./img/createuser.png);
+
+    ![createdbimg](./img/createdb.png);
+
+<br></details><br>
+
+
+<br><details><summary> 테이블 생성 </summary>
+
+    ![createtable](./img/adduser.png);
+
+<br></details><br>
+
+
+<br><details><summary> 더미 데이터 추가 </summary>
+
+    ![insertdata](./img/insertdata.png);
+<br></details><br>
+
+
+<br><details><summary> 데이터 검색 </summary>
+
+<br></details><br>
+
+<br><details><summary> 데이터 변경 </summary>
 
 <br></details><br>
