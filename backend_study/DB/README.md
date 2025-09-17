@@ -1,6 +1,5 @@
 # 센서별 맞춤형 이상 온도 감지 및 로깅 시스템
 
-
 >  각 센서별로 다른 온도 임계값(Threshold)을 설정하고, 이를 초과하는 이상 상황을 실시간으로 감지하여 기록하는 지능형 모니터링 시스템을 MySQL로 구현한 프로젝트입니다.
 
 ## 목차
@@ -15,6 +14,7 @@
 3. 학습 내용
     - 데이터베이스 개요 
     - 데이터베이스 시스템
+    - 스키마 생성(테이블 생성)
     - CRUD
     - 관계정의
     - JOIN
@@ -39,9 +39,9 @@
 
 * **관계형 데이터베이스 설계**: 목적에 따라 `sensors` (설정 정보) 테이블과 `temperature_logs` (시계열 데이터) 테이블을 분리하고, **PK와 FK**로 관계를 맺어 데이터의 정합성과 확장성을 확보했습니다.
 
-* **JOIN을 활용한 데이터 통합**: 분리된 두 테이블을 `JOIN`하여, 각 센서의 **'고유 임계값'**을 기준으로 이상 온도를 판단하는 복합적인 데이터 조회 능력을 증명합니다.
+* **JOIN을 활용한 데이터 통합**: 분리된 두 테이블을 `JOIN`하여, 각 센서의 **고유 임계값**을 기준으로 이상 온도를 판단하는 복합적인 데이터 조회 능력을 증명합니다.
 
-* **실무 지향적인 쿼리 작성**: 단순 CRUD를 넘어, 실제 모니터링 시스템에서 요구되는 **'위험 상황 감지'**라는 구체적인 비즈니스 요구사항을 SQL로 해결하는 능력을 보여줍니다.
+* **실무 지향적인 쿼리 작성**: 단순 CRUD를 넘어, 실제 모니터링 시스템에서 요구되는 **위험 상황 감지**라는 구체적인 비즈니스 요구사항을 SQL로 해결하는 능력을 보여줍니다.
 
 
 
@@ -132,33 +132,35 @@ CREATE TABLE temperature_logs (
 
 1. 데이터 로깅 (INSERT)
 
-    ~~~
-    -- 정상 온도 데이터 삽입
-    INSERT INTO temperature_logs (sensor_id, temperature_celsius) VALUES ('SENSOR-01', 25.5);
-    INSERT INTO temperature_logs (sensor_id, temperature_celsius) VALUES ('SENSOR-01', 26.1);
+~~~
+-- 정상 온도 데이터 삽입
+INSERT INTO temperature_logs (sensor_id, temperature_celsius) VALUES ('SENSOR-01', 25.5);
+INSERT INTO temperature_logs (sensor_id, temperature_celsius) VALUES ('SENSOR-01', 26.1);
 
-    -- 이상 온도 데이터 삽입 (임계값 40도 가정)
-    INSERT INTO temperature_logs (sensor_id, temperature_celsius) VALUES ('SENSOR-01', 42.8); 
-    ~~~
+-- 이상 온도 데이터 삽입 (임계값 40도 가정)
+INSERT INTO temperature_logs (sensor_id, temperature_celsius) VALUES ('SENSOR-01', 42.8); 
+~~~
 
 
 2. 이상 온도 감지 (SELECT)
-    ~~~
-    -- 온도가 40도 이상인 모든 위험 로그 조회
-    SELECT *
-    FROM temperature_logs
-    WHERE temperature_celsius >= 40.0
-    ORDER BY created_at DESC;
-    ~~~
+
+~~~
+-- 온도가 40도 이상인 모든 위험 로그 조회
+SELECT *
+FROM temperature_logs
+WHERE temperature_celsius >= 40.0
+ORDER BY created_at DESC;
+~~~
+
 
 3.오래된 로그 삭제 (DELETE)
 
-    ~~~
-    -- 7일 이전의 모든 로그 데이터 삭제
-    DELETE FROM temperature_logs
-    WHERE created_at < NOW() - INTERVAL 7 DAY;
+~~~
+-- 7일 이전의 모든 로그 데이터 삭제
+DELETE FROM temperature_logs
+WHERE created_at < NOW() - INTERVAL 7 DAY;
 
-    ~~~
+~~~
 
 
 <br></details><br>
