@@ -383,7 +383,7 @@ FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id) ON DELETE CASCADE
 `ON DELETE CASCADE` 옵션은 관계의 무결성을 유지하기 위한 중요한 설정입니다.
 
 *   **동작 방식**: 부모 테이블(`sensors`)에서 특정 센서의 데이터가 삭제될 경우, 해당 센서를 참조하고 있는 자식 테이블(`temperature_logs`)의 모든 관련 데이터(온도 로그)도 **자동으로 함께 삭제**됩니다.
-*   **장점**: 더 이상 존재하지 않는 센서의 '고아 데이터(Orphan Data)'가 남는 것을 방지하여, 데이터의 정합성을 시스템이 자동으로 보장해줍니다. 예를 들어 `SENSOR-01`이 철거되어 `sensors` 테이블에서 삭제되면, `SENSOR-01`에 대한 모든 온도 로그 기록도 깔끔하게 사라집니다.
+*   **장점**: 더 이상 존재하지 않는 센서의 '고아 데이터(Orphan Data)'가 남는 것을 방지하여, 데이터의 정합성을 시스템이 자동으로 보장해줍니다. 예를 들어 `Sensor_1`이 철거되어 `sensors` 테이블에서 삭제되면, `Sensor_1`에 대한 모든 온도 로그 기록도 깔끔하게 사라집니다.
 
 <br></details><br>
 
@@ -393,8 +393,6 @@ FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id) ON DELETE CASCADE
 > `JOIN`은 두 개 이상의 테이블에 나뉘어 저장된 데이터를, **공통된 컬럼(FK-PK 관계)을 기준으로 합쳐서** 하나의 결과 집합으로 조회하는 가장 중요한 SQL 기능 중 하나입니다.
 
 <br>
-
-### 왜 JOIN이 필요한가?
 
 이 프로젝트의 핵심 목표인 **"센서별 맞춤형 이상 온도 감지"** 를 구현하려면 `JOIN`이 필수적입니다.
 
@@ -415,15 +413,15 @@ SELECT
     logs.log_id,
     logs.sensor_id,
     logs.temperature_celsius,
-    s.critical_temp_celsius, -- 어떤 임계값을 넘었는지 확인하기 위해 SELECT에 추가
+    sensors.critical_temp_celsius, -- 어떤 임계값을 넘었는지 확인하기 위해 SELECT에 추가
     logs.created_at,
-    s.location
+    sensors .location
 FROM
     temperature_logs AS logs -- 별칭(Alias)을 사용해 쿼리를 간결하게 만듦
 INNER JOIN
-    sensors AS s ON logs.sensor_id = s.sensor_id
+    sensors ON logs.sensor_id = sensors .sensor_id
 WHERE
-    logs.temperature_celsius >= s.critical_temp_celsius -- 핵심: 자신의 임계값과 비교
+    logs.temperature_celsius >= sensors .critical_temp_celsius -- 핵심: 자신의 임계값과 비교
 ORDER BY
     logs.created_at DESC;
 ~~~
@@ -664,7 +662,16 @@ UPDATE sensors
 SET critical_temp_celsius =  60.00
 WHERE sensor_id = 'Sensor_1';
 ```
-![update](./img/update.png);
+![update](./img/update.png)
+
+
+
+>casecade 설정으로 센서가 제거되면 해당 센서의 로그또한 삭제됩니다.
+```sql
+DELETE FROM sensors
+WHERE sensor_id = 'Sensor_1';
+```
+![delete](./img/delete.png)
 
 
 
