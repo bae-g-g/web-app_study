@@ -79,14 +79,13 @@
 
 <br><details><summary> 보안을 위한 전용 계정 설정 </summary>
 
-> root 계정 대신, 설정 관리용 사용자(server_admin)를 생성하고 server_db에 대한 CRUD 권한만 부여했습니다.
+> root 계정 대신, 서버온도 관리용 사용자(temperature_admin)를 생성하고 my_db에 대한 CRUD 권한만 부여했습니다.
 
 ~~~bash
-# 전용 사용자 생성 학습목적 개인 프로젝트이므로 pw는 123
-CREATE USER 'temperature_admin'@'localhost' IDENTIFIED BY 123;
+CREATE USER 'temperature_admin'@'localhost' IDENTIFIED BY '비밀번호';
 
 # my_server 데이터베이스의 모든 테이블에 대한 CRUD 권한 부여
-GRANT SELECT, INSERT, UPDATE, DELETE ON my_server.* 
+GRANT SELECT, INSERT, UPDATE, DELETE ON my_db.* 
 TO 'temperature_admin'@'localhost';
 FLUSH PRIVILEGES;
 ~~~
@@ -109,6 +108,8 @@ CREATE TABLE sensors (
     critical_temp_celsius DECIMAL(5, 2) NOT NULL COMMENT '위험 임계 온도(섭씨)'
 );
 ```
+
+
 ### 온도 로그 테이블 (temperature_logs)
 실제 측정된 온도 데이터를 시간 순서대로 기록합니다.
 ~~~sql
@@ -120,6 +121,7 @@ CREATE TABLE temperature_logs (
     FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id) ON DELETE CASCADE
 );
 ~~~
+
 
 <br></details><br>
 
@@ -236,6 +238,51 @@ MySQL 엔진이 수립한 실행 계획에 따라, 실제 데이터를 디스크
 스토리지 엔진이 처리한 데이터를 실제 물리적인 파일(데이터 파일, 로그 파일 등)으로 디스크에 저장하는 운영체제(OS) 수준의 계층입니다.
 
 <br></details><br>
+
+
+
+<br><details><summary> 스키마 생성(테이블 생성) </summary>
+
+
+> DB에는 데이터를 저장하는 포멧인 스키마를 설정하여
+해당하는 스키마에 맞춰 데이터를 테이블에 저장합니다.
+
+### 테이블 생성 자료형
+
+
+| 분류 | 자료형  | 설명 | 예시 |
+| :--- | :--- | :--- | :--- |
+| **숫자형** | `INT` | 정수를 저장합니다. (e.g., -21억 ~ 21억) | `123`, `-456` |
+| | `DECIMAL(p, s)` | **고정 소수점 숫자**를 정확하게 저장합니다. 금융 계산처럼 오차가 없어야 할 때 사용합니다. (p: 총 자릿수, s: 소수부 자릿수) | `DECIMAL(10, 2)` -> `12345678.99` |
+| | `DOUBLE` / `FLOAT` | **부동 소수점 숫자**를 저장합니다. 매우 크거나 작은 과학적 숫자에 사용되나 미세한 오차가 발생할 수 있습니다. | `3.1415926535` |
+| **문자열** | `VARCHAR(n)` | **가변 길이 문자열**을 저장합니다. `n`은 최대 길이를 의미하며, 실제 저장된 만큼만 공간을 차지합니다. (최대 65,535자) | `VARCHAR(50)` -> `'안녕하세요'` |
+| | `TEXT` | 매우 긴 텍스트를 저장합니다. (최대 65,535자) 게시판 본문 등에 사용됩니다. | `'긴 텍스트...'` |
+| | `CHAR(n)` | **고정 길이 문자열**을 저장합니다. `n`보다 짧은 데이터를 넣어도 항상 `n`만큼의 공간을 차지합니다. (최대 255자) | `CHAR(1)` -> `'Y'` 또는 `'N'` |
+| **날짜/시간**| `TIMESTAMP` | 타임존 정보가 포함된 날짜와 시간을 저장합니다. (1970년~2038년) 시스템의 시간대에 따라 값이 변환될 수 있습니다. | `'2025-09-17 21:30:00'` |
+| | `DATETIME` | 타임존 정보 없이 날짜와 시간을 저장합니다. (1000년~9999년) 입력된 값을 그대로 저장합니다. | `'2025-09-17 21:30:00'` |
+| | `DATE` | 날짜(년, 월, 일)만 저장합니다. | `'2025-09-17'` |
+| **기타** | `BOOLEAN` | `true` 또는 `false`를 저장합니다. | `true` / `false` |
+| | `JSON` | JSON 형식의 데이터를 저장하고 효율적으로 조회할 수 있습니다. | `'{"name": "배경근", "age": 27}'` |
+
+
+
+### 테이블 생성 옵션
+
+| 옵션 (Option) | 설명 |
+| :--- | :--- |
+| `PRIMARY KEY` | 테이블의 각 행(row)을 고유하게 식별하는 **기본 키**입니다. `NOT NULL`과 `UNIQUE` 속성을 자동으로 포함합니다. |
+| `FOREIGN KEY` | 다른 테이블의 `PRIMARY KEY`를 참조하는 **외래 키**입니다. 테이블 간의 관계를 정의합니다. |
+| `NOT NULL` | 해당 열에 `NULL` 값이 들어올 수 없도록 강제합니다. 즉, 반드시 데이터가 입력되어야 합니다. |
+| `UNIQUE` | 해당 열의 모든 값이 서로 달라야 함을 보장합니다. (단, `NULL`은 여러 개 허용될 수 있습니다.) |
+| `AUTO_INCREMENT`| 새로운 행이 추가될 때마다 자동으로 1씩 증가하는 정수 값을 생성합니다. `PRIMARY KEY`에 주로 사용됩니다. |
+| `DEFAULT` | 값을 명시적으로 입력하지 않았을 때 자동으로 들어갈 기본값을 설정합니다. |
+| `COMMENT` | 해당 열에 대한 설명을 추가합니다. 스키마를 이해하는 데 도움을 줍니다. |
+
+
+
+<br></details><br>
+
+
 
 
 <br><details><summary> CRUD </summary>
@@ -411,38 +458,213 @@ DB에 해당하는 파일 데이터를 적용합니다.
 
 <br><details><summary> MySQL 설치 </summary>
 
-    ![setupimg](./img/setup.png);
+## 설치 & 로그인
+
+~~~bash
+# mac
+brew install mysql
+brew services start mysql
+~~~
+
+~~~bash
+# linux
+sudo apt install mysql-server
+sudo service mysql start
+~~~
+
+```sql
+-- sql
+mysql -u root
+```
+
+![setupimg](./img/setup.png)
+
+
+## root계정비밀번호설정
+
+> 초기에 root계정에는 비밀번호가 설정되지 않습니다(auth_socket설정 = os와 같은 사용자가 접속하면 자동으로 접속허용). 모든권한을 가진 root의 비밀번호 설정은 매우 중요합니다.
+
+```sql
+ALTER USER 'root'@'localhost' IDENTIFIED BY '비밀번호';
+```
+
+비밀번호가 생긴후 `-p`옵션을 통해 접속이 가능해집니다.
+
+![setupimg](./img/rootpw.png)
+
+
 
 <br></details><br>
 
 
 
-<br><details><summary> 사용자 & DB 생성 </summary>
-    
-    ![createuserimg](./img/createuser.png);
+<br><details><summary> DB & 사용자 생성 </summary>
 
-    ![createdbimg](./img/createdb.png);
+## db생성
+
+```sql
+CREATE DATABASE my_db;
+```
+
+```sql
+SHOW DATABASES;
+```
+
+![createdbimg](./img/createdb.png)
+
+## 사용자생성
+```SQL
+
+CREATE USER 'temperature_admin'@'localhost' IDENTIFIED BY '비밀번호'; 
+
+```
+
+
+
+```SQL
+-- 해당 유저에게 my_db의 모든 테이블에 sql의 CRUD권한을 부여합니다. 
+GRANT SELECT, INSERT, UPDATE, DELETE ON my_db.* TO 'temperature_admin'@'localhost';
+```
+
+
+```sql
+-- 해당유저에게 부여된 권한을 보여줍니다.
+SHOW GRANTS FOR 'temperature_admin'@'localhost';
+```
+![createuserimg](./img/createuser.png)
+
+
 
 <br></details><br>
 
 
 <br><details><summary> 테이블 생성 </summary>
 
-    ![createtable](./img/adduser.png);
+## 테이블생성
+
+```sql
+-- 데이터베이스 선택
+use my_db
+```
+
+```sql
+-- 센서 정보를 저장하는 테이블
+CREATE TABLE sensors (
+    sensor_id VARCHAR(20) PRIMARY KEY NOT NULL,
+    location VARCHAR(50) NOT NULL,
+    critical_temp_celsius DECIMAL(5, 2) NOT NULL
+);
+```
+
+```sql
+-- 센서로그를 저장하는 테이블
+CREATE TABLE temperature_logs (
+    log_id INT PRIMARY KEY NOT NULL AUTO_INCREMENT, -- AI옵션으로 자동으로 id지정
+    sensor_id VARCHAR(20) NOT NULL, -- fk sensor 테이블의 pk
+    temperature_celsius DECIMAL(5, 2) NOT NULL , 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 현재 시간으로 자동 지정
+    FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id) ON DELETE CASCADE -- 
+);
+```
+>  시스템의 작동에서 더 이상 존재하지 않는 센서에 대한 로그는 불필요합니다. <br>
+>  따라서 ON DELETE CASCADE 설정을 통해서  연속적으로 삭제되도록합니다.
+
+![createtable](./img/createtables.png)
+
 
 <br></details><br>
 
 
 <br><details><summary> 더미 데이터 추가 </summary>
 
-    ![insertdata](./img/insertdata.png);
+```sql
+-- 센서 데이터 추가
+INSERT INTO sensors (sensor_id, location, critical_temp_celsius) VALUES
+('Sensor_1', 'serverA', 30.00);
+
+INSERT INTO sensors (sensor_id, location, critical_temp_celsius) VALUES
+('Sensor_2', 'serverB', 0.00),
+('Sensor_3', 'serverC', 50.00);
+```
+
+```sql
+-- 각 센서의 로그데이터 추가
+INSERT INTO temperature_logs (sensor_id, temperature_celsius) VALUES
+('Sensor_1', 20.00),
+('Sensor_2', -5.00),
+('Sensor_3', 40.00),
+('Sensor_1', 25.00),
+('Sensor_2', -10.00),
+('Sensor_3', 30.00),
+('Sensor_1', 35.00),
+('Sensor_2', 5.00),
+('Sensor_3', 55.00);
+
+```
+
+![insertdata](./img/insertdata.png)
+
 <br></details><br>
 
 
 <br><details><summary> 데이터 검색 </summary>
 
+> 모든 로그에서 각 센서의 임계온도를 넘는 로그 조회
+~~~sql
+-- 각 센서의 '임계 온도'를 초과한 모든 로그를 조회
+SELECT
+    log.log_id,
+    log.sensor_id,
+    log.temperature_celsius,
+    sensors.location
+FROM
+    temperature_logs AS log 
+INNER JOIN
+    sensors ON log.sensor_id = sensors.sensor_id
+WHERE
+    log.temperature_celsius >= sensors.critical_temp_celsius;
+
+~~~
+![join](./img/join.png)
+
+
+> 특정 시간이후 로깅된 데이터중 임계온도를 넘는 로그 조회
+```sql
+SELECT
+    log.log_id,
+    log.sensor_id,
+    log.temperature_celsius,
+    sensors.location,
+    log.created_at
+FROM
+    temperature_logs AS log
+INNER JOIN
+    sensors  ON log.sensor_id = sensors.sensor_id
+WHERE
+    log.temperature_celsius >= sensors.critical_temp_celsius 
+    AND
+    log.created_at > '2025-09-17 20:10:00';
+```
+![andcondition-time](./img/joinandtime.png)
+
+
+
+
+
 <br></details><br>
 
 <br><details><summary> 데이터 변경 </summary>
 
+> 임계값을 조절하면 추출되는 데이터 또한 변경된다.
+
+```sql
+UPDATE sensors
+SET critical_temp_celsius =  60.00
+WHERE sensor_id = 'Sensor_1';
+```
+![update](./img/update.png);
+
+
+
 <br></details><br>
+
