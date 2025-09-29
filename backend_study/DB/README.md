@@ -19,7 +19,7 @@
     - CRUD
     - 관계정의
     - JOIN
-- [4. 과정](#4-과정)
+- [4. 과정](#4-db세팅-과정)
     - MySQL 설치
     - 사용자 & DB 생성
     - 테이블 생성 
@@ -455,7 +455,7 @@ DB에 해당하는 파일 데이터를 적용합니다.
 
 <br>
 
-# 4. 과정
+# 4. DB세팅 과정
 
 
 
@@ -475,8 +475,7 @@ sudo apt install mysql-server
 sudo service mysql start
 ~~~
 
-```sql
--- sql
+```bash
 mysql -u root
 ```
 
@@ -566,9 +565,11 @@ CREATE TABLE temperature_logs (
     sensor_id VARCHAR(20) NOT NULL, -- fk sensor 테이블의 pk
     temperature_celsius DECIMAL(5, 2) NOT NULL , 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 현재 시간으로 자동 지정
+    handle_at  TIMESTAMP NULL
     FOREIGN KEY (sensor_id) REFERENCES sensors(sensor_id) ON DELETE CASCADE -- 
 );
 ```
+
 >  시스템의 작동에서 더 이상 존재하지 않는 센서에 대한 로그는 불필요합니다. <br>
 >  따라서 ON DELETE CASCADE 설정을 통해서  연속적으로 삭제되도록합니다.
 
@@ -604,6 +605,10 @@ INSERT INTO temperature_logs (sensor_id, temperature_celsius) VALUES
 ('Sensor_3', 55.00);
 
 ```
+INSERT INTO temperature_logs (sensor_id, temperature_celsius) VALUES
+('Sensor_3', 60.00);
+
+
 
 ![insertdata](./img/insertdata.png)
 
